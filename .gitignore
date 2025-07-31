@@ -24,6 +24,8 @@ wheels/
 *.log
 user_activity.db
 .env
+.env.local
+.env.production
 
 # IDE
 .vscode/
