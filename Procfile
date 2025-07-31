@@ -1,1 +1,1 @@
-web: node simple-start.js
+web: node app.js
