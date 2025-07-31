@@ -1,3 +1,0 @@
-# Alternative requirements if main version fails
-python-telegram-bot==20.8
-APScheduler==3.10.4

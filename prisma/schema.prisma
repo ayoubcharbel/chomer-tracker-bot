@@ -1,0 +1,138 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String    @id // Telegram user ID as string
+  username    String?   // Telegram username (can be null)
+  firstName   String    // First name from Telegram
+  lastName    String?   // Last name from Telegram (can be null)
+  fullName    String    // Computed full name
+  joinedAt    DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  isActive    Boolean   @default(true)
+  
+  // Relations
+  messages    Message[]
+  dailyStats  DailyStats[]
+  weeklyStats WeeklyStats[]
+  monthlyStats MonthlyStats[]
+  
+  @@map("users")
+}
+
+model Message {
+  id          String      @id @default(cuid())
+  userId      String      // Telegram user ID
+  messageId   Int         // Telegram message ID
+  chatId      String      // Telegram chat ID
+  content     String?     // Message text content
+  messageType MessageType @default(TEXT)
+  timestamp   DateTime    @default(now())
+  
+  // Relations
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("messages")
+  @@index([userId, timestamp])
+  @@index([chatId, timestamp])
+}
+
+model DailyStats {
+  id           String   @id @default(cuid())
+  userId       String   // Telegram user ID
+  date         DateTime // Date for these stats (start of day)
+  messageCount Int      @default(0)
+  stickerCount Int      @default(0)
+  totalPoints  Int      @default(0) // For airdrop calculations
+  
+  // Relations
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("daily_stats")
+  @@unique([userId, date])
+  @@index([date])
+  @@index([totalPoints])
+}
+
+model WeeklyStats {
+  id           String   @id @default(cuid())
+  userId       String   // Telegram user ID
+  weekStart    DateTime // Start of the week (Monday)
+  messageCount Int      @default(0)
+  stickerCount Int      @default(0)
+  totalPoints  Int      @default(0)
+  
+  // Relations
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("weekly_stats")
+  @@unique([userId, weekStart])
+  @@index([weekStart])
+  @@index([totalPoints])
+}
+
+model MonthlyStats {
+  id           String   @id @default(cuid())
+  userId       String   // Telegram user ID
+  monthStart   DateTime // Start of the month (1st day)
+  messageCount Int      @default(0)
+  stickerCount Int      @default(0)
+  totalPoints  Int      @default(0)
+  
+  // Relations
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("monthly_stats")
+  @@unique([userId, monthStart])
+  @@index([monthStart])
+  @@index([totalPoints])
+}
+
+enum MessageType {
+  TEXT
+  STICKER
+  PHOTO
+  VIDEO
+  AUDIO
+  DOCUMENT
+  VOICE
+  VIDEO_NOTE
+  LOCATION
+  CONTACT
+  ANIMATION
+  POLL
+  DICE
+  GAME
+  VENUE
+  NEW_CHAT_MEMBERS
+  LEFT_CHAT_MEMBER
+  NEW_CHAT_TITLE
+  NEW_CHAT_PHOTO
+  DELETE_CHAT_PHOTO
+  GROUP_CHAT_CREATED
+  SUPERGROUP_CHAT_CREATED
+  CHANNEL_CHAT_CREATED
+  MIGRATE_TO_CHAT_ID
+  MIGRATE_FROM_CHAT_ID
+  PINNED_MESSAGE
+  INVOICE
+  SUCCESSFUL_PAYMENT
+  CONNECTED_WEBSITE
+  PASSPORT_DATA
+  PROXIMITY_ALERT_TRIGGERED
+  VIDEO_CHAT_SCHEDULED
+  VIDEO_CHAT_STARTED
+  VIDEO_CHAT_ENDED
+  VIDEO_CHAT_PARTICIPANTS_INVITED
+  WEB_APP_DATA
+  OTHER
+}

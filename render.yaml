@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: chomer-tracker-bot
+    runtime: node
+    plan: starter
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: TELEGRAM_BOT_TOKEN
+        fromGroup: env-vars
+      - key: DATABASE_URL
+        fromDatabase:
+          name: chomer-tracker-db
+          property: connectionString
+      - key: POINTS_PER_MESSAGE
+        value: "1"
+      - key: POINTS_PER_STICKER
+        value: "2"
+      - key: LOG_LEVEL
+        value: info
+
+databases:
+  - name: chomer-tracker-db
+    databaseName: chomer_tracker
+    plan: starter

@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: chomer-tracker-bot
+    runtime: node
+    plan: starter
+    buildCommand: npm install
+    startCommand: node simple-start.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: TELEGRAM_BOT_TOKEN
+        value: 8068971149:AAETb7h7-Dxmf6d3aMH2BxWP5l_xcEcaqMg

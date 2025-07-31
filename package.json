@@ -1,0 +1,17 @@
+{
+  "name": "chomer-tracker-bot-simple",
+  "version": "1.0.0",
+  "description": "Simple Telegram bot for tracking group activity",
+  "main": "simple-start.js",
+  "scripts": {
+    "start": "node simple-start.js",
+    "test": "node test-bot.js"
+  },
+  "dependencies": {
+    "node-telegram-bot-api": "^0.64.0",
+    "dotenv": "^16.3.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

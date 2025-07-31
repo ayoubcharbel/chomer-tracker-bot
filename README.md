@@ -1,125 +1,149 @@
-# Telegram Activity Tracker Bot
+# Chomer Tracker Bot
 
-A Telegram bot that tracks user activities in group chats and maintains a leaderboard for the most active participants. Perfect for community engagement and airdrops!
+A comprehensive Telegram bot for tracking group activity with persistent data storage, designed for airdrop eligibility tracking.
 
 ## Features
 
-- 🏆 **Leaderboard System**: Track the most active users
-- 📊 **Point System**: 1 point per message, 1 point per sticker
-- 💾 **Persistent Storage**: Points accumulate over time (never reset)
-- 📈 **Detailed Statistics**: Individual user stats and rankings
-- 🎯 **Group Chat Only**: Works exclusively in Telegram groups
-- 🔍 **Activity Logging**: Detailed activity tracking for transparency
+- **Message Tracking**: Monitors all messages, stickers, and media in group chats
+- **User Management**: Tracks usernames, full names, and user activity
+- **Statistics**: Daily, weekly, and monthly activity statistics
+- **Leaderboards**: Multiple leaderboard views for different time periods
+- **Points System**: Configurable point system for airdrop calculations
+- **Persistent Storage**: PostgreSQL database with Prisma ORM
+- **Scalable**: Ready for growing communities
 
 ## Commands
 
-- `/start` - Initialize the bot and register user
-- `/leaderboard` - View top 10 users by points
-- `/mystats` - Check your personal statistics
-- `/rank` - Check your current rank
-- `/stats` - General bot statistics
-- `/help` - Show help message
+- `/start` - Initialize the bot and show welcome message
+- `/help` - Show help information
+- `/leaderboard` - Show all-time leaderboard
+- `/leaderboard daily` - Show today's activity
+- `/leaderboard weekly` - Show this week's activity
+- `/leaderboard monthly` - Show this month's activity
 
-## Installation
+## Point System
 
-1. **Clone or download the files**
+- **Regular Messages**: 1 point each
+- **Stickers**: 2 points each
 
-2. **Install dependencies**:
+## Tech Stack
+
+- **Runtime**: Node.js with TypeScript
+- **Bot Framework**: node-telegram-bot-api
+- **Database**: PostgreSQL with Prisma ORM
+- **Logging**: Winston
+- **Date Handling**: date-fns
+- **Deployment**: Render.com ready
+
+## Environment Variables
+
+Required environment variables:
+
+```bash
+TELEGRAM_BOT_TOKEN=your_bot_token_here
+DATABASE_URL=postgresql://username:password@host:port/database
+NODE_ENV=production
+PORT=3000
+LOG_LEVEL=info
+POINTS_PER_MESSAGE=1
+POINTS_PER_STICKER=2
+```
+
+## Database Schema
+
+The bot uses the following main entities:
+
+- **Users**: Telegram user information and metadata
+- **Messages**: All tracked messages with type classification
+- **DailyStats**: Daily activity statistics per user
+- **WeeklyStats**: Weekly activity statistics per user
+- **MonthlyStats**: Monthly activity statistics per user
+
+## Deployment on Render
+
+1. Fork this repository
+2. Connect your GitHub account to Render
+3. Create a new Web Service on Render
+4. Connect your forked repository
+5. Use the provided `render.yaml` for automatic configuration
+6. Set the required environment variables
+7. Deploy!
+
+### Manual Deployment Steps
+
+1. **Database Setup**:
+   - Create a new PostgreSQL database on Render
+   - Copy the internal database URL
+
+2. **Web Service Setup**:
+   - Build Command: `npm install && npm run build`
+   - Start Command: `npm start`
+   - Environment Variables:
+     - `TELEGRAM_BOT_TOKEN`: Your bot token from @BotFather
+     - `DATABASE_URL`: Your PostgreSQL connection string
+     - `NODE_ENV`: `production`
+     - Other optional variables as needed
+
+3. **Bot Setup**:
+   - Create a bot via @BotFather on Telegram
+   - Get your bot token
+   - Add the bot to your group as an administrator
+
+## Local Development
+
+1. Clone the repository:
    ```bash
-   pip install -r requirements.txt
+   git clone <your-repo-url>
+   cd chomer-tracker-bot
    ```
 
-3. **Configure the bot**:
-   - The bot token is already configured in `config.py`
-   - You can modify point values and other settings in `config.py`
-
-4. **Run the bot**:
+2. Install dependencies:
    ```bash
-   python bot.py
+   npm install
    ```
 
-## Setup Instructions
+3. Set up your environment variables:
+   ```bash
+   cp .env.example .env
+   # Edit .env with your values
+   ```
 
-1. **Add bot to your group**:
-   - Search for your bot on Telegram using its username
-   - Add it to your group chat
-   - Make sure the bot has permission to read messages
+4. Set up the database:
+   ```bash
+   npm run db:push
+   ```
 
-2. **Start tracking**:
-   - Users can send `/start` to register
-   - The bot automatically tracks all messages and stickers
-   - Use `/leaderboard` to see the current rankings
+5. Start development server:
+   ```bash
+   npm run dev
+   ```
 
-## Database Structure
+## Database Migration
 
-The bot uses SQLite with two main tables:
+To deploy database changes:
 
-### Users Table
-- `user_id`: Telegram user ID (primary key)
-- `username`: Telegram username
-- `first_name`, `last_name`: User's name
-- `points`: Total accumulated points
-- `message_count`: Number of messages sent
-- `sticker_count`: Number of stickers sent
-- `first_seen`: When user was first registered
-- `last_activity`: Last activity timestamp
+```bash
+npm run db:deploy
+```
 
-### Activity Log Table
-- `id`: Auto-increment ID
-- `user_id`: Foreign key to users table
-- `activity_type`: "message" or "sticker"
-- `timestamp`: When the activity occurred
-- `points_earned`: Points awarded for this activity
+## Monitoring
 
-## Configuration Options
+The bot includes comprehensive logging with Winston. Logs are stored in:
+- `logs/error.log` - Error logs only
+- `logs/combined.log` - All logs
+- Console output - Formatted logs with colors
 
-Edit `config.py` to customize:
+## Scaling Considerations
 
-- `POINTS_PER_MESSAGE`: Points awarded per message (default: 1)
-- `POINTS_PER_STICKER`: Points awarded per sticker (default: 1)
-- `MAX_LEADERBOARD_ENTRIES`: How many users to show in leaderboard (default: 10)
-- `ADMIN_USER_IDS`: List of admin user IDs for special commands
+- Database indices are optimized for common queries
+- Stats updates are performed asynchronously
+- Connection pooling is handled by Prisma
+- Horizontal scaling ready (stateless design)
 
-## Files Overview
+## License
 
-- `bot.py`: Main bot logic and handlers
-- `database.py`: Database operations and queries
-- `config.py`: Configuration settings
-- `requirements.txt`: Python dependencies
-- `user_activity.db`: SQLite database (created automatically)
-- `bot.log`: Log file (created automatically)
-
-## Usage for Airdrops
-
-Since points never reset and accumulate over time, you can easily:
-
-1. Run the bot in your community group
-2. Let members accumulate points through natural activity
-3. On your launch date, use `/leaderboard` to see the top user
-4. Award the airdrop to the #1 ranked member
-
-The bot maintains detailed logs and statistics, making it perfect for transparent community rewards and airdrops.
-
-## Logging
-
-The bot logs all activities to:
-- Console output
-- `bot.log` file
-
-This ensures transparency and helps with debugging or verifying user activities.
-
-## Security Notes
-
-- The bot only responds to group chats, not private messages
-- No admin commands are implemented by default (for security)
-- All user data is stored locally in SQLite database
-- Bot token is configured in `config.py` (keep this file secure)
+MIT License - See LICENSE file for details.
 
 ## Support
 
-If you encounter any issues:
-1. Check the `bot.log` file for error messages
-2. Ensure the bot has proper permissions in your group
-3. Verify that the bot token is correct and active
-
-Enjoy tracking your community's activity! 🚀
+For support, please create an issue in the GitHub repository.
