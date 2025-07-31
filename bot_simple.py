@@ -4,7 +4,9 @@ Simplified Telegram Bot for cloud deployment - More stable version
 
 import logging
 import os
+import threading
 from datetime import datetime
+from http.server import HTTPServer, BaseHTTPRequestHandler
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 from telegram.constants import ParseMode
@@ -139,10 +141,37 @@ async def handle_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     
     logger.info(f"User {user.first_name} earned {POINTS_PER_STICKER} point(s) for sticker")
 
+class HealthHandler(BaseHTTPRequestHandler):
+    """Simple HTTP handler for health checks"""
+    def do_GET(self):
+        if self.path == '/health':
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(b'{"status": "Bot is running", "service": "telegram-activity-bot"}')
+        else:
+            self.send_response(404)
+            self.end_headers()
+    
+    def log_message(self, format, *args):
+        # Suppress HTTP server logs
+        pass
+
+def start_http_server():
+    """Start HTTP server for Render port requirement"""
+    port = int(os.environ.get('PORT', 10000))
+    server = HTTPServer(('0.0.0.0', port), HealthHandler)
+    logger.info(f"HTTP server starting on port {port}")
+    server.serve_forever()
+
 def main() -> None:
     """Start the bot"""
     try:
         logger.info("Starting Telegram Activity Bot...")
+        
+        # Start HTTP server in background thread for Render
+        http_thread = threading.Thread(target=start_http_server, daemon=True)
+        http_thread.start()
         
         # Create application
         application = Application.builder().token(BOT_TOKEN).build()
