@@ -279,9 +279,7 @@ def main() -> None:
         
         # Run the bot with optimal settings for cloud deployment
         application.run_polling(
-            allowed_updates=Update.ALL_TYPES,
-            drop_pending_updates=True,
-            close_loop=False
+            drop_pending_updates=True
         )
         
     except Exception as e:
