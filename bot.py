@@ -256,27 +256,36 @@ async def handle_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 
 def main() -> None:
     """Start the bot"""
-    # Create application
-    application = Application.builder().token(BOT_TOKEN).build()
-    
-    # Command handlers
-    application.add_handler(CommandHandler("start", start))
-    application.add_handler(CommandHandler("help", help_command))
-    application.add_handler(CommandHandler("leaderboard", leaderboard))
-    application.add_handler(CommandHandler("mystats", my_stats))
-    application.add_handler(CommandHandler("stats", bot_stats))
-    application.add_handler(CommandHandler("rank", user_rank))
-    
-    # Message handlers
-    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-    application.add_handler(MessageHandler(filters.Sticker.ALL, handle_sticker))
-    
-    # Log startup
-    logger.info("Bot started successfully!")
-    print("🤖 Bot is running! Press Ctrl+C to stop.")
-    
-    # Run the bot
-    application.run_polling(allowed_updates=Update.ALL_TYPES)
+    try:
+        # Create application
+        application = Application.builder().token(BOT_TOKEN).build()
+        
+        # Command handlers
+        application.add_handler(CommandHandler("start", start))
+        application.add_handler(CommandHandler("help", help_command))
+        application.add_handler(CommandHandler("leaderboard", leaderboard))
+        application.add_handler(CommandHandler("mystats", my_stats))
+        application.add_handler(CommandHandler("stats", bot_stats))
+        application.add_handler(CommandHandler("rank", user_rank))
+        
+        # Message handlers
+        application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+        application.add_handler(MessageHandler(filters.Sticker.ALL, handle_sticker))
+        
+        # Log startup
+        logger.info("Bot started successfully!")
+        print("🤖 Bot is running! Press Ctrl+C to stop.")
+        
+        # Run the bot with error handling
+        application.run_polling(
+            allowed_updates=Update.ALL_TYPES,
+            drop_pending_updates=True
+        )
+        
+    except Exception as e:
+        logger.error(f"Error starting bot: {e}")
+        print(f"❌ Bot failed to start: {e}")
+        raise
 
 if __name__ == '__main__':
     main()
