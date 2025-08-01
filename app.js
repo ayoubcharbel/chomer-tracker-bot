@@ -71,17 +71,50 @@ bot.onText(/\/stats/, (msg) => {
   bot.sendMessage(msg.chat.id, message);
 });
 
-// Health check for Render
+// Health check for Render with keep-alive
 const express = require('express');
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.get('/', (req, res) => res.send('Bot is running!'));
+app.get('/', (req, res) => res.json({
+  status: 'active',
+  uptime: Math.floor(process.uptime()),
+  users: users.size,
+  timestamp: new Date().toISOString()
+}));
+
 app.get('/health', (req, res) => res.json({ status: 'ok', users: users.size }));
+
+app.get('/ping', (req, res) => {
+  console.log('🏓 Keep-alive ping received');
+  res.json({ pong: true, time: new Date().toISOString() });
+});
+
+// KEEP-ALIVE SYSTEM - Prevents Render from sleeping
+function keepAlive() {
+  const url = 'https://chomer-tracker-bot.onrender.com';
+  
+  setInterval(async () => {
+    try {
+      const response = await fetch(`${url}/ping`);
+      console.log('🔄 Keep-alive ping successful');
+    } catch (error) {
+      console.log('⚠️ Keep-alive ping failed');
+    }
+  }, 10 * 60 * 1000); // Every 10 minutes
+}
 
 app.listen(port, () => {
   console.log(`✅ Bot ready on port ${port}`);
   console.log('✅ Telegram bot active');
+  console.log('🔄 Keep-alive system starting...');
+  
+  // Start keep-alive after 1 minute
+  setTimeout(() => {
+    if (process.env.NODE_ENV === 'production') {
+      keepAlive();
+    }
+  }, 60000);
 });
 
 // Error handling
