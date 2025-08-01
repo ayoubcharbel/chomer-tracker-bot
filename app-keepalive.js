@@ -8,7 +8,7 @@ const bot = new TelegramBot(token, { polling: true });
 // In-memory storage
 const users = new Map();
 
-console.log('🚀 Bot starting with keep-alive...');
+console.log('🚀 Bot starting with keep-alive system active...');
 
 // Track messages (same as before)
 bot.on('message', (msg) => {
